@@ -1,0 +1,11 @@
+# Ignore npm package files in frontend
+/frontend/package.json
+/frontend/package-lock.json
+/frontend/node_modules
+
+# Ignore npm package files in backend
+/backend/package.json
+/backend/package-lock.json
+/backend/.env
+/backend/node_modules
+
