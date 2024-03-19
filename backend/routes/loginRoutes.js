@@ -7,7 +7,6 @@ const { validateToken } = require("../middlewares/JWTmiddleware.js");
 router.route("/login").post(postLogin);
 router.route("/logout").post(postLogout);
 router.route("/register").post(postRegister);
-// router.route("/profile").get(validateToken,getProfile);
-router.route("/profile").get(getProfile);
+router.route("/profile").get(validateToken,getProfile);
 
 module.exports = router;

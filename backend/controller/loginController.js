@@ -32,7 +32,7 @@ var postLogin = async(req,res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log(email,password);
+    // console.log(email,password);
 
     const existingUser = await user.findOne({ email: email });
 
@@ -52,8 +52,8 @@ var postLogin = async(req,res) => {
                     secure: false, 
                     sameSite: "none",
                 }
-                res.cookie("access-token",accessToken,{maxAge : 2592000000 },options);
-                res.cookie("user-info",userInfo,{maxAge : 2592000000 },options);
+                res.cookie("access-token", accessToken, { maxAge: 2592000000});
+                res.cookie("user-info", userInfo, { maxAge: 2592000000 });
                 res.json({token:accessToken,auth:true,msg:`User with email - ${email} is Logged In!!`});
             }
         })
@@ -61,21 +61,16 @@ var postLogin = async(req,res) => {
     
 }
 var postLogout = (req,res) => {
-    try{
-        res.clearCookie("access-token");
-        res.clearCookie("user-info");
-        res.send("Logout is Successfull!!");
-    }
-    catch(err){
-        res.status(400).json({err : err});
-    }
+    res.clearCookie('access-token',{ maxAge: 2592000000});
+    res.clearCookie('user-info',{ maxAge: 2592000000});
+    res.status(200).send('Logged out successfully');
 }
 var getProfile = (req,res) => {
     // console.log("Entering",res.cookies["user-info"])
     // res.cookie("id",1);
     if (req.cookies["user-info"]) {
-        console.log(req.cookies["user-info"].email);
-        res.json({email:req.cookies["user-info"].email});
+        // console.log(req.cookies["user-info"].email);
+        res.json({email:req.cookies["user-info"].email,_id:req.cookies["user-info"]._id,auth:true});
     } else {
         console.log("User info cookie not found in the request.");
     }

@@ -5,7 +5,7 @@ const secret = process.env.JWTSECRET;
 
 const validateToken = (req,res,next) =>{
     const accessToken = req.cookies["access-token"];
-    if(!accessToken)return res.status(400).json({err : "User is not authenticated."});
+    if(!accessToken)return res.status(400).json({err : "User is not authenticated.",auth:false});
     try{
         const validToken = verify(accessToken,secret);
         if(validToken)req.authenticated = true;

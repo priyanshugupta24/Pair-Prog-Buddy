@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
 const loginRoutes = require("./routes/loginRoutes.js");
+const friendRoutes = require("./routes/friendRoutes.js");
 const cors = require('cors');
 var dotenv = require('dotenv').config();
 var mongoose = require('mongoose');
@@ -23,5 +24,6 @@ app.get("/",(req,res)=>{
     res.send("Working");
 })
 app.use('/api', loginRoutes);
+app.use('/api', friendRoutes);
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

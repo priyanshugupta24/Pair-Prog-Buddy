@@ -40,7 +40,11 @@ function Test() {
     var logout = async(e) => {
         e.preventDefault();
         try{
-            const response = await axios.post("http://localhost:5123/api/logout","");
+            const response = await axios.post("http://localhost:5123/api/logout",{},
+            {
+              withCredentials: true,
+              credentials: "include",
+            });
             console.log('Response:', response.data);
         }
         catch (error) {
@@ -59,6 +63,7 @@ function Test() {
             setProfile(response.data.email);
         }
         catch(err){
+            setProfile("")
             console.log("The Error Is Here");
             console.error('Error:', err);
         }

@@ -13,8 +13,18 @@ var userSchema = new mongoose.Schema({
     // exp : String,
     // stack  : String,
     // timeToCode : String,
-    // friends : Array,
-    // waitList : Array,
+    accountPrivacy : {
+        type : String,
+        default : "Private"
+    },
+    friends : {
+        type : [String],
+        default : []
+    },
+    waitList : {
+        type : [String],
+        default : []
+    },
     // chatLogs : String,
     // useCase : String,
 });
