@@ -93,4 +93,19 @@ const removeFriend = async(req,res) => {
         res.status(200).json(`${getId} and ${removeFriendId} are no Longer Friends.`);
     }
 }
-module.exports = { sendFriendReq,acceptFriendReq,removeFriend };
+
+const getFriends = async(req,res) => {
+    if (req.cookies["user-info"]){
+        const getId = req.cookies["user-info"]._id;
+
+        const existingUserSelf = await user.findOne({ _id : getId });
+        if(!existingUserSelf)res.status(400).json({err : "You are not Authenticated"});
+
+        getFriendsList = await user.findOne({ _id : getId });
+
+        if(!getFriendsList)res.status(400).json("You have no Friends.");
+        res.status(200).json({friends : getFriendsList.friends});
+    }
+}
+
+module.exports = { sendFriendReq,acceptFriendReq,removeFriend,getFriends };
