@@ -1,10 +1,15 @@
 var mongoose = require('mongoose');
 
 var codingEnvSchema = new mongoose.Schema({
-    session_id : String,
-    people_user_id : Array,
-    room_logs : Array,
-    no_of_joinees : Array,
+    sessionId : String,
+    participantsId : {
+        type : [String],
+        default : []
+    },
+    sessionLogs : {
+        type : [String],
+        default : []
+    },
 });
 
 const codingEnv =  mongoose.model("codingEnvSchema",codingEnvSchema);
