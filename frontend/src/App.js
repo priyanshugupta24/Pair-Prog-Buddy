@@ -1,9 +1,19 @@
 import React from 'react'
-import Test from './Test'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Session from './Components/Session/Session'
+import HomePage from './Components/HomePage/HomePage';
+import Navbar from './Components/Navbar/Navbar';
+
 function App() {
   return (
     <div>
-      <Test/>
+        <BrowserRouter>
+          <Navbar/>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path='/session/:sessionId' element={<Session/>} />
+          </Routes>
+        </BrowserRouter>
     </div>
   )
 }

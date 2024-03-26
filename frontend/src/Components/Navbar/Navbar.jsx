@@ -81,18 +81,18 @@ function Navbar() {
         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
-        <NavLink className="navbar-brand" to="/">Brand</NavLink>
+        <NavLink className="navbar-brand" to="/" exact="true">Brand</NavLink>
 
         <div className="collapse navbar-collapse" id="navbarTogglerDemo03">
           <ul className="navbar-nav mr-auto mt-2 mt-lg-0">
             <li className="nav-item">
-              <NavLink exact className="nav-link" activeClassName="active" to="/">Home</NavLink>
+              <NavLink exact="true" className="nav-link" active="active" to="/">Home</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" activeClassName="active" to="/link">Link</NavLink>
+              <NavLink className="nav-link" active="active" to="/link" exact="true">Link</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" activeClassName="active" to="/disabled">Disabled</NavLink>
+              <NavLink className="nav-link" active="active" to="/disabled" exact="true">Disabled</NavLink>
             </li>
           </ul>
           <form className="form-inline my-2 my-lg-0">
