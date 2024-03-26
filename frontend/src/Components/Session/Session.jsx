@@ -17,7 +17,7 @@ function Session() {
   let { sessionId } = useParams();
   return (
     <div>
-      <div>This Is {sessionId}</div>
+      {/* <div>This Is {sessionId}</div> */}
       {/* <WhiteBoard socket={socket} boardId={boardId}/> */}
       <WhiteBoard socket={socket}/>
     </div>

@@ -15,7 +15,10 @@ const WhiteBoard = (server) => {
         });
         socket.on("mouseMoveSelect",({id,newX,newY,height,width,type})=>{
             socket.broadcast.emit("mouseMoveSelect",{id,newX,newY,height,width,type});
-        })
+        });
+        socket.on("clearCanvas",({msg})=>{
+            socket.broadcast.emit("clearCanvas",{msg});
+        });
     })
 }
 
