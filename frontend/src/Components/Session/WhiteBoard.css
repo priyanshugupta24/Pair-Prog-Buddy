@@ -6,3 +6,24 @@ body {
 .radio{
     color:white;
 }
+.violet{
+    accent-color:violet;
+}
+.indigo{
+    accent-color:indigo;
+}
+.blue{
+    accent-color:blue;
+}
+.green{
+    accent-color: green;
+}
+.yellow{
+    accent-color: yellow;
+}
+.orange{
+    accent-color: orange;
+}
+.red{
+    accent-color: red;
+}

@@ -19,6 +19,9 @@ const WhiteBoard = (server) => {
         socket.on("clearCanvas",({msg})=>{
             socket.broadcast.emit("clearCanvas",{msg});
         });
+        socket.on("updateText",({elements})=>{
+            socket.broadcast.emit("updateText",{elements});
+        })
     })
 }
 
