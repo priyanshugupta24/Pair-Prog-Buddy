@@ -1,8 +1,9 @@
 import React from 'react'
 import { useParams } from 'react-router-dom';
 import io from "socket.io-client";
-import WhiteBoard from './WhiteBoard';
 import Elements from './Elements';
+import "./Session.css"
+
 
 const server = "http://localhost:5123";
 const connectionOptions = {
@@ -19,9 +20,8 @@ function Session() {
   return (
     <div>
       {/* <div>This Is {sessionId}</div> */}
-      {/* <WhiteBoard socket={socket} boardId={boardId}/> */}
-      <Elements/>
-      <WhiteBoard socket={socket}/>
+
+      <Elements socket={socket} sessionId={sessionId}/>
     </div>
   )
 }

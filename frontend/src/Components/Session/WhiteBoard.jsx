@@ -3,9 +3,11 @@ import rough from 'roughjs/bundled/rough.esm'
 import { getStroke } from 'perfect-freehand'
 import grid from "../../assets/grid.jpg"
 import "./WhiteBoard.css"
+import axios from 'axios';
+
 const generator = rough.generator();
 
-function WhiteBoard({ socket }) {
+function WhiteBoard({ socket,uniqueId }) {
     const [elements, setElements] = useState([]);
     const [action, setAction] = useState("none");
     const [tool, setTool] = useState("pencil");
@@ -15,6 +17,15 @@ function WhiteBoard({ socket }) {
     const [strokecolor, setStrokeColor] = useState("#000000");
     const [eleWidth, setEleWidth] = useState(8);
     const [fillstyle, setFillStyle] = useState("solid");
+
+
+    window.addEventListener("keydown", function(event) {
+        if (event.altKey && event.key === "s") {
+        //   event.preventDefault();
+          saveElements();
+          console.log("Saved!!");
+        }
+    });
 
     useEffect(() => {
         const resizeElements = () => {
@@ -27,7 +38,7 @@ function WhiteBoard({ socket }) {
             // canvas.style.marginLeft = 0.01 * window.innerHeight;
             canvas.width = 0.77 * windowWidth;
             canvas.height = windowHeight;
-            
+
             toolbar.style.width = '20%';
             toolbar.style.height = `${windowHeight}px`;
         };
@@ -41,6 +52,10 @@ function WhiteBoard({ socket }) {
         };
     }, []);
 
+    useEffect(()=>{
+        loadElements();
+    },[uniqueId])
+
     useLayoutEffect(() => {
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext("2d");
@@ -50,6 +65,45 @@ function WhiteBoard({ socket }) {
         elements.forEach(element => drawElement(roughCanvas, ctx, element));
     }, [elements]);
 
+    const saveElements = async (event) => {
+        // event.preventDefault();
+        try {
+            const form = {
+                uuidEle : uniqueId,
+                elements : elements
+            }
+            const response = await axios.post("http://localhost:5123/api/saveWhiteBoard", form, {
+                headers: {
+                    "Content-type": "application/json"
+                },
+                withCredentials: true,
+            });
+            // console.log('Response:', response.data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const loadElements = async(event) => {
+        // event.preventDefault();
+        try {
+            const form = {
+                uuidEle : uniqueId,
+            }
+            const response = await axios.post("http://localhost:5123/api/loadWhiteBoard", form, {
+                headers: {
+                    "Content-type": "application/json"
+                },
+                withCredentials: true,
+            });
+            setElements(response.data.ele);
+            // console.log('Response:', response.data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Socket Logic
     socket.on("mouseDownDraw", ({ id, clientX, clientY, type, elements }) => {
         setElements(elements);
     });
@@ -285,7 +339,7 @@ function WhiteBoard({ socket }) {
             <div>
                 {/* Please Remove */}
                 <br />
-                <div style={{ display: "flex", flexDirection: "row",justifyContent:"space-evenly" }}>
+                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly" }}>
                     <div>
                         {action === "writing" ?
                             <textarea onBlur={handleBlur} style={{
@@ -387,7 +441,7 @@ function WhiteBoard({ socket }) {
                     </div>
                 </div>
             </div>
-            <div style={{ backgroundColor: "#343a40", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-around", borderRadius: "2vw", padding: "2vh",width:"98vw",marginLeft:"1vw"}}>
+            <div style={{ backgroundColor: "#343a40", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-around", borderRadius: "2vw", padding: "2vh", width: "98vw", marginLeft: "1vw" }}>
 
                 <label htmlFor="fillcolor" className="radio">Select A Fill Colour</label>
                 <div>
@@ -437,10 +491,6 @@ function WhiteBoard({ socket }) {
                     </button>
                 </div>
             </div>
-
-
-            {/* <button onClick={() => { socket.emit("test", "This is a test message") }}>Send</button>
-            <button onClick={() => console.log(elements)}>getEle</button> */}
         </div>
     )
 }

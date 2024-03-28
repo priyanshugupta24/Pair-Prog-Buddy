@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
-var codingEnvSchema = new mongoose.Schema({
-    sessionId : String,
+var sessionEnvSchema = new mongoose.Schema({
+    sessionId : Number,
     participantsId : {
         type : [String],
         default : []
@@ -10,8 +10,12 @@ var codingEnvSchema = new mongoose.Schema({
         type : [String],
         default : []
     },
+    sessionElements : {
+        type : [{object:String,unique_id:String}],
+        default : []
+    }
 });
 
-const codingEnv =  mongoose.model("codingEnvSchema",codingEnvSchema);
+const sessionEnv =  mongoose.model("sessionEnvSchema",sessionEnvSchema);
 
-module.exports = { codingEnv };
+module.exports = { sessionEnv };
