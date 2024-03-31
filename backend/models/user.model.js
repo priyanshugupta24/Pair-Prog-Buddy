@@ -1,23 +1,73 @@
 var mongoose = require('mongoose');
 
 var userSchema = new mongoose.Schema({
-    // firstName : String,
-    // lastName : String,
-    // profileId : String,
+    name : String,
+    username : String,
     email : String,
     password : String,
+    pfp : { 
+        type:String, 
+        default:"" 
+    },
     // session : Boolean,
     // logs : String,
-    // region:String,
-    // skills : String,
-    // exp : String,
-    // stack  : String,
-    // timeToCode : String,
+    links : {
+        github: { 
+            type:String, 
+            default:"" 
+        }, 
+        linkedin: { 
+            type:String, 
+            default:"" 
+        },
+        twitter: { 
+            type:String, 
+            default:"" 
+        },
+        leetcode : { 
+            type:String, 
+            default:"" 
+        },
+        resume : {
+            type : String,
+            default : ""
+        }
+    },
+    region : {
+        country : { 
+            type:String, 
+            default:"America" 
+        },
+        state : { 
+            type:String, 
+            default:"New Mexico" 
+        },
+        city : { 
+            type:String, 
+            default:"Negra Arroyo Lane  , Albuquerque" 
+        }
+    },
+    skills : {
+        type : [String],
+        default : []
+    },
+    stack  : {
+        type : [String],
+        default : []
+    },
+    timeToCode : {
+        type : String,
+        default : ""
+    },
     accountPrivacy : {
         type : String,
-        default : "Private"
+        default : "private"
     },
     friends : {
+        type : [String],
+        default : []
+    },
+    followers : {
         type : [String],
         default : []
     },

@@ -1,6 +1,5 @@
-import React, { useState, useLayoutEffect, useEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 import WhiteBoard from './WhiteBoard'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import axios from 'axios';
 
 function Elements({ socket, sessionId }) {
@@ -12,6 +11,11 @@ function Elements({ socket, sessionId }) {
   useLayoutEffect(() => {
     getSessionElements();
   }, [])
+
+  socket.on("getSession",({msg})=>{
+      console.log(msg);
+      getSessionElements()
+  })
 
   const getSessionElements = async (event) => {
     // event.preventDefault();
@@ -33,7 +37,6 @@ function Elements({ socket, sessionId }) {
       console.error('Error:', error);
     }
   }
-
   const handleWhiteBoard = async (uid) => {
     setUniqueId(uid);
     setObject("whiteboard");
@@ -56,6 +59,7 @@ function Elements({ socket, sessionId }) {
       console.error('Error:', error);
     }
 
+    socket.emit("getSession","getSession");
     var prev = null;
     setSessionElements(prevElements =>
       prevElements.filter((element) => {
@@ -83,6 +87,7 @@ function Elements({ socket, sessionId }) {
         withCredentials: true,
       });
       console.log('Response:', response.data);
+      socket.emit("getSession","Create object");
       getSessionElements();
     } catch (error) {
       console.error('Error:', error);

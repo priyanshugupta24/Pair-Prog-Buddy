@@ -1,4 +1,116 @@
-.welcomeuser{
+.welcome-user{
     color:white;
     margin-right:1.2vw
+}
+.form-element{
+    color:black;
+}
+.modal-wrapper{
+    position : fixed;
+    left : 0;
+    right : 0;
+    bottom: 0;
+    top: 0;
+    background-color: rgba(189,189,189,0.9);
+}
+.modal-container{
+    position : fixed;
+    /* max-width: 30rem; */
+    top : 50%;
+    left : 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f7326d;
+    /* background-color: #fd433d; */
+    /* padding : 2rem 3rem; */
+    border-radius: 0.5rem;
+    height : 75vh;
+    width : 55vw;
+    display:flex;
+    flex-direction: row;
+}
+.left{
+    width:50%;
+    transition: width 0.5s ease, opacity 0.5s ease;
+}
+.left-decor{
+    width : 100%;
+    height : 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-wrap: break-word;
+    text-align: center;
+    padding:3.4vw;
+}
+.right{
+    width:50%;
+}
+.right-decor{
+    width : 100%;
+    height : 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-wrap: break-word;
+    text-align: center;
+    padding:3.4vw;
+}
+.white-text{
+    color:white;
+}
+.form{
+    background-color: white;
+    height : 75vh;
+    width : 27.5vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* margin-left:27.5vw; */
+}
+.form-group{
+    display : flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height : 4vh;
+    border-bottom: 1px solid black;
+    /* width : 95%; */
+    
+}
+.login-heading{
+    margin-bottom: 5vh;
+}
+#label{
+    height:2.5vh;
+    bottom : 0;
+    cursor: pointer;
+}
+#first-name,#last-name,#user-name,#email,#password,#confirm-password,#email2,#password2{
+    border : none;
+    height : 100%;
+    cursor: pointer;
+    width : 90%;
+}
+#first-name:focus,#last-name:focus,#user-name:focus,#email:focus,#password:focus,#email2:focus{
+    outline: none;
+}
+#password2:focus {
+    outline: none;
+}
+.submit{
+    width : 22vw !important;
+}
+.btn{
+    /* width : 80%; */
+    margin : 0.2vw;
+}
+.extend-btn{
+    width : 80%;
+}
+.btn-decor{
+    margin-top : 2vh;
+    width : 22vw;
 }

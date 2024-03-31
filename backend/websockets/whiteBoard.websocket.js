@@ -22,6 +22,9 @@ const WhiteBoard = (server) => {
         socket.on("updateText",({elements})=>{
             socket.broadcast.emit("updateText",{elements});
         })
+        socket.on("getSession",({msg})=>{
+            socket.broadcast.emit("getSession",{msg});
+        });
     })
 }
 

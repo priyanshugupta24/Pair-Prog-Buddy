@@ -1,12 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Navbar from '../Navbar/Navbar.jsx';
 
 function HomePage() {
+  
   return (
-    
     <div>
-      <Navbar/>
-      This is the HomePage
+      <Navbar />
+      <div style={{color:"white"}}>This Is HomePage</div>
     </div>
   )
 }
