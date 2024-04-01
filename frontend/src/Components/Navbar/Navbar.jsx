@@ -4,10 +4,15 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import "./Navbar.css";
 
+import { initializeApp } from "firebase/app";
+import { firebaseConfig } from '../../Config/firebase.config';
+
+const app = initializeApp(firebaseConfig);
 
 function Navbar() {
   const [showModal, setShowModal] = useState(false);
   const [profile, setProfile] = useState("");
+  const [profileImage,setProfileImage] = useState("");
 
   useEffect(() => {
     getProfile();
@@ -21,7 +26,9 @@ function Navbar() {
         },
         withCredentials: true,
       });
-      console.log('Response:', response.data);
+      setProfileImage(response.data.user.pfp);
+      // console.log(response.data.pfp);
+      // console.log('Response:', response.data);
       setProfile(response.data.username || "");
     } catch (err) {
       console.log("Not Authenticated");
@@ -220,7 +227,12 @@ function Navbar() {
           <form className="form-inline my-2 my-lg-0">
             {profile ?
               (<>
-                <div className="welcome-user">Welcome {profile}</div>
+                <NavLink to="/profile" exact="true" className="navlink">
+                  <div style={{display:"flex",flexDirection:"row",justifyContent:"center",alignItems:"center"}}>
+                      <img src={profileImage} className="pfp"/>
+                      <div className="welcome-user">Welcome {profile}</div>
+                  </div>
+                </NavLink>
                 <div className="d-flex flex-column flex-md-row">
                   <button className="btn btn-outline-danger my-2 my-sm-0" type="submit" onClick={logout}>Logout</button>
                 </div>

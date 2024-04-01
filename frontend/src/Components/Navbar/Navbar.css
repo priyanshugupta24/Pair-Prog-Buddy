@@ -114,3 +114,12 @@
     margin-top : 2vh;
     width : 22vw;
 }
+.pfp{
+    width: 6vh; 
+    height: 6vh; 
+    border-radius: 50%; 
+    margin-right: 0.7vw;
+}
+.navlink {
+    text-decoration: none;
+}

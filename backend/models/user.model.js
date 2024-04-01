@@ -7,10 +7,8 @@ var userSchema = new mongoose.Schema({
     password : String,
     pfp : { 
         type:String, 
-        default:"" 
+        default:"https://firebasestorage.googleapis.com/v0/b/pair-prog-buddy.appspot.com/o/PFP's%2FDefault%20PFP.jpg?alt=media&token=f344f23b-ee3e-4008-b22d-a1e27b27da8f" 
     },
-    // session : Boolean,
-    // logs : String,
     links : {
         github: { 
             type:String, 
@@ -64,19 +62,25 @@ var userSchema = new mongoose.Schema({
         default : "private"
     },
     friends : {
-        type : [String],
-        default : []
-    },
-    followers : {
-        type : [String],
+        type : [mongoose.Schema.Types.Mixed],
         default : []
     },
     waitList : {
         type : [String],
         default : []
     },
-    // chatLogs : String,
-    // useCase : String,
+    shortIntro : {
+        type : String,
+        default : ""
+    },
+    longIntro : {
+        type : String,
+        default : ""
+    },
+    subscription : {
+        type : Boolean,
+        default : false
+    },
 });
 
 const user = mongoose.model("User",userSchema);

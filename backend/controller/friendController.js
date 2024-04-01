@@ -43,19 +43,30 @@ const acceptFriendReq = async(req, res) => {
                 },
                 { "$pull": { "waitList":  sentReqId}},
             )
+            let score = 0;
+            const friendDetail = {
+                _id : sentReqId,
+                username : existingUserRemote.username,
+                score : score
+            }
+            const clientDetail = {
+                _id : getId,
+                username : existingUserSelf.username,
+                score : score
+            }
             await user.updateOne(
                 {
                     _id : sentReqId,
-                    "friends": { $ne : getId }
+                    "friends": { $ne : clientDetail }
                 },
-                { "$push": { "friends":  getId}},
+                { "$push": { "friends":  clientDetail}},
             )
             await user.updateOne(
                 {
                     _id : getId,
-                    "friends": { $ne : sentReqId }
+                    "friends": { $ne : friendDetail }
                 },
-                { "$push": { "friends":  sentReqId}},
+                { "$push": { "friends":  friendDetail}},
             )
             res.status(200).json(`Friend Request Accepted by ${getId}`);
         }
@@ -83,11 +94,11 @@ const removeFriend = async(req,res) => {
 
         await user.updateOne(
             {_id : getId},
-            { "$pull": { "friends":  removeFriendId}},
+            { "$pull": { "friends":  { _id : removeFriendId }}},
         )        
         await user.updateOne(
             {_id : removeFriendId},
-            { "$pull": { "friends":  getId}},
+            { "$pull": { "friends":  { _id : getId }}},
         )
 
         res.status(200).json(`${getId} and ${removeFriendId} are no Longer Friends.`);

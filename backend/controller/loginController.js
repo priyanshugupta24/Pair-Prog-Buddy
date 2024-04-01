@@ -72,12 +72,19 @@ var postLogout = (req,res) => {
     res.clearCookie('user-info',{ maxAge: 2592000000});
     res.status(200).send('Logged out successfully');
 }
-var getProfile = (req,res) => {
+var getProfile = async(req,res) => {
     // console.log("Entering",res.cookies["user-info"])
     // res.cookie("id",1);
     if (req.cookies["user-info"]) {
         // console.log(req.cookies["user-info"].email);
-        res.json({username:req.cookies["user-info"].username,_id:req.cookies["user-info"]._id,auth:true});
+        const username = req.cookies["user-info"].username;
+        const existingUser = await user.findOne({ username : username });
+        res.json({
+            username:req.cookies["user-info"].username,
+            _id:req.cookies["user-info"]._id,
+            auth:true,
+            user : existingUser,
+        });
     } else {
         console.log("User info cookie not found in the request.");
     }
