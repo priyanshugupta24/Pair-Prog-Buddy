@@ -4,15 +4,12 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import "./Navbar.css";
 
-import { initializeApp } from "firebase/app";
-import { firebaseConfig } from '../../Config/firebase.config';
-
-const app = initializeApp(firebaseConfig);
 
 function Navbar() {
   const [showModal, setShowModal] = useState(false);
   const [profile, setProfile] = useState("");
   const [profileImage,setProfileImage] = useState("");
+  const [profileId,setProfileId] = useState("");
 
   useEffect(() => {
     getProfile();
@@ -27,6 +24,7 @@ function Navbar() {
         withCredentials: true,
       });
       setProfileImage(response.data.user.pfp);
+      setProfileId(response.data.user.username);
       // console.log(response.data.pfp);
       // console.log('Response:', response.data);
       setProfile(response.data.username || "");
@@ -133,6 +131,10 @@ function Navbar() {
       }
       setIsLogin(!isLogin);
     }
+    const handleTestLogin = () => {
+      login("Waltuhh", "123");
+      closeModal();
+    }
     return ReactDOM.createPortal(
       <>
         <div className="modal-wrapper" onClick={closeModal}></div>
@@ -141,7 +143,8 @@ function Navbar() {
             <div className="left-decor">
               <h1 className="white-text">Welcome Back</h1>
               <div className="white-text">Glad To See You Again , Enter Your Details To Connect With Us Again!!</div>
-              <button type="button" className="btn btn-outline-light btn-decor" onClick={handleToggle}>Register</button>
+              <button type="button" className="btn btn-outline-light btn-decor decor1" onClick={handleToggle}>Register</button>
+              <button type="button" className="btn btn-outline-light btn-decor" onClick={handleTestLogin}>Test Login</button>
             </div>
           </div>
 
@@ -196,7 +199,8 @@ function Navbar() {
             <div className="right-decor">
               <h1 className="white-text">Welcome User</h1>
               <div className="white-text">Enter Your Personal Details And Start A  Journey With Us!</div>
-              <button type="button" className="btn btn-outline-light btn-decor" onClick={handleToggle}>Login</button>
+              <button type="button" className="btn btn-outline-light btn-decor decor1" onClick={handleToggle}>Login</button>
+              <button type="button" className="btn btn-outline-light btn-decor" onClick={handleTestLogin}>Test Login</button>
             </div>
           </div>
         </div>
@@ -227,7 +231,7 @@ function Navbar() {
           <form className="form-inline my-2 my-lg-0">
             {profile ?
               (<>
-                <NavLink to="/profile" exact="true" className="navlink">
+                <NavLink to={`/profile/${profileId}`} exact="true" className="navlink">
                   <div style={{display:"flex",flexDirection:"row",justifyContent:"center",alignItems:"center"}}>
                       <img src={profileImage} className="pfp"/>
                       <div className="welcome-user">Welcome {profile}</div>

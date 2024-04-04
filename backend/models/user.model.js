@@ -46,12 +46,14 @@ var userSchema = new mongoose.Schema({
         }
     },
     skills : {
-        type : [String],
-        default : []
-    },
-    stack  : {
-        type : [String],
-        default : []
+        top3 : {
+            type : [String],
+            default : []
+        },
+        normal : {
+            type : [String],
+            default : []
+        }
     },
     timeToCode : {
         type : String,
@@ -81,6 +83,10 @@ var userSchema = new mongoose.Schema({
         type : Boolean,
         default : false
     },
+    prefer : {
+        type : String,
+        default : ""
+    }
 });
 
 const user = mongoose.model("User",userSchema);

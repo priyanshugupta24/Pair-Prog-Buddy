@@ -1,0 +1,134 @@
+.container-form{
+    display : flex;
+    justify-content: center;
+    margin-top: 9vh;
+    border-radius: 2vw;
+    align-items: center;
+}
+.container-inner{
+    padding : 2vw;
+    background-color: #343a40;
+    height : fit-content;
+    width : 60vw;
+    display : flex;
+    justify-content: center;
+    align-items: center;
+    border : 2px solid white;
+    border-radius: 2vw;
+    flex-direction: column;
+}
+.form-title{
+    font-size: 2vw;
+    font-weight: 600;
+    border-bottom: 2px solid white;
+    margin-bottom: 2vw;
+    /* justify-self: center; */
+    /* width : fit-content; */
+}
+.form-group1{
+    display : flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height : 100%;
+    margin-bottom: 1.5vw;
+    /* height : 4vh; */
+    /* border-bottom: 1px solid white; */
+    /* width : 95%; */
+}
+#first-name1,#github,#leetcode,#linkedin,#twitter,#resume{
+    border : none;
+    height : 8vh;
+    cursor: pointer;
+    width :45vw;
+    /* background-color: #343a40; */
+    color : black;
+    padding : 1.5vw;
+    font-size: 1.5vw;
+    margin-left: 0.8vw;
+    border-radius : 2vw;
+    border-bottom: 0.4vw solid blue;
+    border-right: 0.4vw solid blue;
+    overflow-x: scroll;
+}
+#first-name1:focus,#github:focus,#leetcode:focus,#linkedin:focus,#twitter:focus,#resume:focus{
+    outline: none;
+    border-bottom : none;
+    border-right : none;
+    border-top: 0.4vw solid red;
+    border-left: 0.4vw solid red;
+}
+.enter-ele{
+    font-size: 1.6vw;
+    margin-bottom: 1vh;
+}
+.pfp{
+    display : none;
+}
+.pfp-btn{
+    /* border : none; */
+    height : 8vh;
+    cursor: pointer;
+    width :45vw;
+    /* background-color: #343a40; */
+    color : black;
+    padding : 1.5vw;
+    font-size: 1.5vw;
+    margin-left: 0.8vw;
+    border-radius : 2vw;
+    border-bottom: 0.4vw solid blue;
+    border-right: 0.4vw solid blue;
+    border-top: 0.4vw solid red;
+    border-left: 0.4vw solid red;
+    /* overflow-x: scroll; */
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.short-intro{
+    width:45vw;
+    border-radius : 1.5vw;
+    padding : 1vw;
+    margin-bottom: 1.5vw;
+    font-size: 1.4vw;
+    border-bottom: 0.4vw solid blue;
+    border-right: 0.4vw solid blue;
+    border-top: 0.4vw solid red;
+    border-left: 0.4vw solid red;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+.short-intro:focus{
+    border-bottom: 0.4vw solid red;
+    border-right: 0.4vw solid red;
+    border-top: 0.4vw solid blue;
+    border-left: 0.4vw solid blue;
+}
+.custom-dropdown-menu1{
+    width: 45vw;
+    border : none;
+}
+.custom-dropdown-menu2{
+    width: 45vw;
+    background-color: black;
+    border : 3px solid white;
+    /* color : blue; */
+}
+.dropdown-item{
+    color:white;
+    cursor:pointer;
+}
+.ddmp{
+    width:45vw;
+    background-color: white;
+    border-radius:2vw;
+    color:black;
+    border-bottom: 0.4vw solid red;
+    border-right: 0.4vw solid red;
+    border-top: 0.4vw solid blue;
+    border-left: 0.4vw solid blue;
+}
+/* .btn{
+}
+   */
