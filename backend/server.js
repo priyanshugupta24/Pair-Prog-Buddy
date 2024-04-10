@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const loginRoutes = require("./routes/loginRoutes.js");
 const friendRoutes = require("./routes/friendRoutes.js");
 const sessionRoutes = require("./routes/sessionRoutes.js")
+const reccomendationRoutes = require("./routes/reccomendationRoutes.js");
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
@@ -34,6 +35,7 @@ app.get("/", (req, res) => {
 app.use('/api', loginRoutes);
 app.use('/api', friendRoutes);
 app.use('/api', sessionRoutes);
+app.use('/api', reccomendationRoutes);
 // app.use((req, res, next) => {
 //     res.header("Access-Control-Allow-Origin", "*");
 //     res.header(

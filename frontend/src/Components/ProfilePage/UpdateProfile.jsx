@@ -5,13 +5,35 @@ import "./UpdateProfile.css";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
 import { firebaseConfig } from "../../Config/firebase.config.js";
+import { countrystatecityConfig } from "../../Config/countrystatecity.config.js"
+import { skills } from "../ProfilePage/skills.manual.js"
+import { useNavigate } from 'react-router-dom';
 
 const app = firebase.initializeApp(firebaseConfig);
 const storage = firebase.storage(app);
 
 function UpdateProfile() {
     let { profileId } = useParams();
+    const navigate = useNavigate();
+
+    const [prevCsc,setPrevCsc] = useState({
+        country : "",
+        state : "",
+        city : "",
+        iso2Country : "",
+        iso2State : ""
+    }) 
     const [ownUsername, setOwnUsername] = useState("");
+    const [countries, setCountries] = useState([{
+        name: "",
+    }]);
+    const [states, setStates] = useState([{
+        name: "",
+        iso2 : ""
+    }]);
+    const [city, setCity] = useState([{
+        name: "",
+    }]);
     const [profile, setProfile] = useState({
         name: "",
         pfp: "",
@@ -19,7 +41,9 @@ function UpdateProfile() {
         region: {
             country: "",
             state: "",
-            city: ""
+            city: "",
+            iso2Country: "",
+            iso2State : ""
         },
         links: {
             github: "",
@@ -33,15 +57,17 @@ function UpdateProfile() {
         timeToCode: "",
         skills: {
             top3: ["", " "],
-            normal: ["", " "]
+            normal: []
         },
         username: profileId,
-        prefer : ""
+        prefer: "",
+        email : "",
     });
 
     useEffect(() => {
         getProfile();
         getOwnUsername();
+        loadCountries();
     }, []);
 
     const getOwnUsername = async () => {
@@ -86,21 +112,22 @@ function UpdateProfile() {
                 shortIntro: response.data.user.shortIntro,
                 longIntro: response.data.user.longIntro,
                 username: response.data.user.username,
-                prefer : response.data.user.prefer
+                prefer: response.data.user.prefer,
+                password : response.data.password,
+                waitList : response.data.waitList,
             }
+            setPrevCsc({
+                country : response.data.user.region.country,
+                state : response.data.user.region.state,
+                city : response.data.user.region.city,
+                iso2Country : response.data.user.region.iso2Country,
+                iso2State : response.data.user.region.iso2State,
+            });
             //   console.log(user)
             setProfile(user);
         } catch (err) {
             console.log("Not Authenticated");
         }
-    }
-    const handleChange = (e, ele) => {
-        const { value } = e.target;
-        setProfile({
-            ...profile,
-            [ele]: value
-        })
-        console.log(profile);
     }
     const handleChangeLinks = (e, ele) => {
         const { value } = e.target;
@@ -111,18 +138,28 @@ function UpdateProfile() {
                 [ele]: value
             }
         })
-        console.log(profile);
+        // console.log(profile);
     }
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const name = formData.get('name1');
-        const github = formData.get('github');
-        const leetcode = formData.get('leetcode');
-        const linkedin = formData.get('linkedin');
-        const twitter = formData.get('twitter');
-        const resume = formData.get('resume');
-        console.log(name, github, leetcode, linkedin, twitter, resume);
+        console.log(profile)
+        try {
+            
+            const response = await axios.post("http://localhost:5123/api/saveProfile", {
+                profile:profile,
+                prev : prevCsc
+            }, {
+              headers: {
+                "Content-type": "application/json"
+              },
+              withCredentials: true,
+            });
+            console.log('Response:', response.data);
+            navigate(`/profile/${profileId}`)
+            // history.push();
+          } catch (error) {
+            console.error('Error:', error);
+        }
     }
     const handlePfpUpload = (e) => {
         const selectedFile = e.target.files[0];
@@ -133,7 +170,7 @@ function UpdateProfile() {
                     // You can handle progress here if needed
                 },
                 (err) => {
-                    console.log(err); // Handle errors
+                    // console.log(err); // Handle errors
                 },
                 () => {
                     storage.ref("PFP's").child(profile._id).getDownloadURL()
@@ -146,7 +183,7 @@ function UpdateProfile() {
                             // console.log(profile)
                         })
                         .catch(error => {
-                            console.log(error); // Handle errors
+                            // console.log(error); // Handle errors
                         });
                 }
             );
@@ -158,30 +195,186 @@ function UpdateProfile() {
         if (words.length <= 30) {
             setProfile({ ...profile, shortIntro: inputValue });
         }
-        console.log(profile.shortIntro)
+        // console.log(profile.shortIntro)
     }
     const handleLongIntro = (e) => {
         const inputValue = e.target.value;
         setProfile({ ...profile, longIntro: inputValue });
-        console.log(profile.longIntro)
+        // console.log(profile.longIntro)
     }
-    const handleTimeToCode = (e,ele) => {
+    const handleTimeToCode = (e, ele) => {
         e.preventDefault();
         setProfile({
             ...profile,
-            timeToCode:ele
+            timeToCode: ele
         })
         // console.log(profile.timeToCode);
     }
-    const handlePrefer = (e,ele) => {
+    const handlePrefer = (e, ele) => {
         e.preventDefault();
         setProfile({
             ...profile,
-            prefer:ele
+            prefer: ele
         })
+    }
+    const loadCountries = () => {
+        var headers = new Headers();
+        headers.append("X-CSCAPI-KEY", countrystatecityConfig.cKEY);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: headers,
+            redirect: 'follow'
+        };
+
+        fetch("https://api.countrystatecity.in/v1/countries", requestOptions)
+            .then(response => response.text())
+            .then(result => {
+                // console.log(result)
+                result = JSON.parse(result)
+                // console.log(typeof result)
+                setCountries(result);
+            })
+            .catch(error => console.log('error', error));
+        // console.log(countries);
+    }
+    // Comment Here
+    // useEffect(() => { console.log("THIS",profile) }, [profile.region.state])
+    const handleCountryChange = (e, selectedCountry, iso2) => {
+        e.preventDefault();
+        setProfile(prevProfile => ({
+            ...prevProfile,
+            region: {
+                country: selectedCountry,
+                iso2Country : iso2
+            }
+        }));
+    };
+    
+    useEffect(() => {
+        if (profile.region.country) {
+            // console.log(profile.region.iso2);
+            loadStateByISO2();
+        }
+    }, [profile.region.country]);
+    
+    const loadStateByISO2 = () => {
+        var headers = new Headers();
+        headers.append("X-CSCAPI-KEY", countrystatecityConfig.cKEY);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: headers,
+            redirect: 'follow'
+        };
+        // console.log("THis is",iso2)
+        // console.log("THis is 2",profile.region.iso2)
+        fetch(`https://api.countrystatecity.in/v1/countries/${profile.region.iso2Country}/states`, requestOptions)
+            .then(response => response.text())
+            .then(result => {
+                // console.log(result)
+                result = JSON.parse(result)
+                // console.log(typeof result)
+                setStates(result);
+            })
+            // .catch(error => console.log('error', error));
+    }
+    const handleStateChange = (e, selectedState,iso2) => {
+        e.preventDefault();
+        setProfile({
+            ...profile,
+            region: {
+                ...profile.region,
+                state: selectedState,
+                iso2State: iso2
+            }
+        })
+        // console.log(profile.region.state)
+    }
+    useEffect(() => {
+        if (profile.region.state) {
+            // console.log(profile.region.iso2);
+            loadCityByISO2();
+        }
+    }, [profile.region.state]);
+    const loadCityByISO2 = () => {
+        var headers = new Headers();
+        headers.append("X-CSCAPI-KEY", countrystatecityConfig.cKEY);
+
+        var requestOptions = {
+            method: 'GET',
+            headers: headers,
+            redirect: 'follow'
+        };
+        
+        fetch(`https://api.countrystatecity.in/v1/countries/${profile.region.iso2Country}/states/${profile.region.iso2State}/cities`, requestOptions)
+        .then(response => response.text())
+        .then(result => {
+            // console.log(result)
+            result = JSON.parse(result)
+            // console.log(typeof result)
+            setCity(result);
+        })
+        // .catch(error => console.log('error', error));
+    }
+    const handleCityChange = (e, selectedCity) => {
+        e.preventDefault();
+        setProfile({
+            ...profile,
+            region: {
+                ...profile.region,
+                city: selectedCity,
+            }
+        })
+        // console.log(profile.region.state)
+    }
+    const handleTop3Add = (name) => {
+        if(profile.skills.top3.length < 3){
+            setProfile(prevProfile => ({
+                ...prevProfile,
+                skills: {
+                    ...prevProfile.skills,
+                    top3: [...prevProfile.skills.top3, name]
+                }
+            }));
+        }
+    }
+    const handleSkillsAdd = (name) =>{
+        // console.log(name)
+        setProfile(prevProfile => ({
+            ...prevProfile,
+            skills: {
+                ...prevProfile.skills,
+                normal: [...prevProfile.skills.normal, name]
+            }
+        }));
+    }
+    const handleSkillsRemove = (name) =>{
+        // console.log(name)
+        setProfile(prevProfile => ({
+            ...prevProfile,
+            skills: {
+                ...prevProfile.skills,
+                normal: prevProfile.skills.normal.filter(element => element !== name)
+            }
+        }));
+        // console.log(name)
+    }
+    const handleTop3Remove = (name) => {
+        setProfile(prevProfile => ({
+            ...prevProfile,
+            skills: {
+                ...prevProfile.skills,
+                top3: prevProfile.skills.top3.filter(element => element !== name)
+            }
+        }));
     }
     return (
         <div style={{ color: "white" }}>
+            {/* <button onClick={loadStateByISO2}>CLK2</button> */}
+            {/* <button onClick={()=>{
+                console.log(states[0].name)
+            }}>CLK3</button> */}
             {ownUsername === profileId ? (
                 <>
                     {/* username* pfp* region shortIntro links top3-skills skills longIntro timeToCode subscription */}
@@ -189,21 +382,55 @@ function UpdateProfile() {
                         <div className="container-form">
                             <div className="container-inner">
                                 <div className="form-title">Hello {profile.name}</div>
-                                <div className="enter-ele"> Enter Name</div>
-                                <div className="form-group1">
-                                    <label htmlFor="first-name1" id="label"><svg style={{ color: "#fff", height: "1.5vw" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z" fill="#fff"></path></svg></label>
-                                    <input type="text" placeholder='Name' id="first-name1" name="name1" autoComplete='off' value={profile.username} onChange={(e) => handleChange(e, "username")} />
-                                </div>
-                                {/* PFP */}
                                 <div className="enter-ele">Upload a PFP</div>
+                                <a href={profile.pfp} target="_blank">Click To Check Selected PFP</a>
                                 <div className="form-group1">
                                     <label htmlFor="pfp-select"><svg style={{ color: "white", height: "2vw" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z" fill="white"></path></svg></label>
                                     <label htmlFor="pfp-select"><div className="pfp-btn"><div className="pfp-btn-text">Select A PFP of Your Choice</div></div></label>
                                     <input type="file" name="pfp-select" id="pfp-select" onChange={handlePfpUpload} className="pfp" />
                                 </div>
+                                <div className="enter-ele">Select Country</div>
+                                <div className="dropdown custom-dropdown-menu1">
+                                    <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {profile.region.country === "" ? <span className="dropdown-text">Select Your Country</span> : <span className="dropdown-text">{profile.region.country}</span>}
+                                    </button>
+                                    <div className="dropdown-menu custom-dropdown-menu2" id="dropdown1" aria-labelledby="dropdownMenuButton">
+                                        {
+                                            countries.map((elements, index) => (
+                                                <div key={index} className="dropdown-item" onClick={(e) => handleCountryChange(e, elements.name, elements.iso2)}>{elements.name}</div>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                                <div className="enter-ele">Select State</div>
+                                <div className="dropdown custom-dropdown-menu1">
+                                    <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {profile.region.state === "" ? <span className="dropdown-text">Select Your State</span> : <span className="dropdown-text">{profile.region.state}</span>}
+                                    </button>
+                                    <div className="dropdown-menu custom-dropdown-menu2" id="dropdown1" aria-labelledby="dropdownMenuButton">
+                                        {
+                                            Array.isArray(states) && states.map((elements, index) => (
+                                                    <div key={index} className="dropdown-item" onClick={(e)=>{handleStateChange(e,elements.name,elements.iso2)}}>{elements.name}</div>
+                                                ))
+                                        }
+                                    </div>
+                                </div>
+                                <div className="enter-ele">Select City</div>
+                                <div className="dropdown custom-dropdown-menu1">
+                                    <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        {profile.region.city === "" ? <span className="dropdown-text">Select Your City</span> : <span className="dropdown-text">{profile.region.city}</span>}
+                                    </button>
+                                    <div className="dropdown-menu custom-dropdown-menu2" id="dropdown1" aria-labelledby="dropdownMenuButton">
+                                        {
+                                            Array.isArray(city) && city.map((elements, index) => (
+                                                    <div key={index} className="dropdown-item" onClick={(e)=>{handleCityChange(e,elements.name)}}>{elements.name}</div>
+                                                ))
+                                        }
+                                    </div>
+                                </div>
                                 <div className="enter-ele">Write a Short Intro that is Reflected  on Your Profile.</div>
                                 <div className="form-group1">
-                                    <label htmlFor="shortintro"><svg style={{color: "white", height: "2vw",marginRight:"1vw"}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z" fill="white"></path></svg></label>
+                                    <label htmlFor="shortintro"><svg style={{ color: "white", height: "2vw", marginRight: "1vw" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z" fill="white"></path></svg></label>
                                     <textarea
                                         value={profile.shortIntro}
                                         onChange={handleShortIntro}
@@ -240,10 +467,56 @@ function UpdateProfile() {
                                     <label htmlFor="resume" id="label"><svg style={{ color: "white", height: "2vw" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>ionicons-v5-n</title><rect x="96" y="112" width="96" height="96" rx="16" ry="16" style={{ fill: "none" }}></rect><path d="M468,112H416V416a32,32,0,0,0,32,32h0a32,32,0,0,0,32-32V124A12,12,0,0,0,468,112Z" fill="white"></path><path d="M431.15,477.75A64.11,64.11,0,0,1,384,416V44a12,12,0,0,0-12-12H44A12,12,0,0,0,32,44V424a56,56,0,0,0,56,56H430.85a1.14,1.14,0,0,0,.3-2.25ZM96,208V112h96v96ZM320,400H96V368H320Zm0-64H96V304H320Zm0-64H96V240H320Zm0-64H224V176h96Zm0-64H224V112h96Z" fill="white"></path></svg></label>
                                     <input type="text" placeholder='Resume Link' id="resume" name="resume" autoComplete='off' value={profile.links.resume} onChange={(e) => handleChangeLinks(e, "resume")} />
                                 </div>
-                                <div className="enter-ele">Write Something About Yourself.</div>
+                                
+                                <div className="enter-ele"> Enter Your Top 3 Skills</div>
+                                <div className="skill-box">
+                                    {
+                                        profile.skills.top3.length === 0?<div>Currently No Skills.Add Skills!!</div>:
+                                        profile.skills.top3.sort((a, b) => a.length - b.length).map((element,index)=>(<div className="top3-skill-outer" key={index}>
+                                            <div className="top3-skill">{element}</div>
+                                            <div className="cross-skill" onClick={()=>{handleTop3Remove(element)}}>x</div>
+                                        </div>))
+                                    }
+                                </div>
+                                <div className="dropdown custom-dropdown-menu1">
+                                    <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span className="dropdown-text">Select Your Top3 Skills</span>
+                                    </button>
+                                    <div className="dropdown-menu custom-dropdown-menu2" id="dropdown1" aria-labelledby="dropdownMenuButton">
+                                        {
+                                            Array.isArray(skills) && skills.map((elements, index) => (
+                                                <div key={index} className="dropdown-item" onClick={()=>{handleTop3Add(elements.name)}}>{elements.name}</div>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
 
+                                <div className="enter-ele"> Enter Your Skills</div>
+                                <div className="skill-box">
+                                    {
+                                        Array.isArray(profile.skills.top3) && profile.skills.top3.length === 0?<div>Currently No Skills.Add Skills!!</div>:
+                                        profile.skills.normal.sort((a, b) => a.length - b.length).map((element,index)=>(<div key={index} className="top3-normal-outer">
+                                            <div className="top3-skill">{element}</div>
+                                            <div className="cross-skill" onClick={()=>{handleSkillsRemove(element)}}>x</div>
+                                        </div>))
+                                    }
+                                </div>
+                                <div className="dropdown custom-dropdown-menu1">
+                                    <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span className="dropdown-text">Select Your Skills</span>
+                                    </button>
+                                    <div className="dropdown-menu custom-dropdown-menu2" id="dropdown1" aria-labelledby="dropdownMenuButton">
+                                        {
+                                            Array.isArray(skills) && skills.map((elements, index) => (
+                                                <div key={index} className="dropdown-item" onClick={()=>{handleSkillsAdd(elements.name)}}>{elements.name}</div>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+
+                                <div className="enter-ele">Write Something About Yourself.</div>
                                 <div className="form-group1">
-                                    <label htmlFor="shortintro"><svg style={{color: "white", height: "2vw",marginRight:"1vw"}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z" fill="white"></path></svg></label>
+                                    <label htmlFor="shortintro"><svg style={{ color: "white", height: "2vw", marginRight: "1vw" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z" fill="white"></path></svg></label>
                                     <textarea
                                         value={profile.longIntro}
                                         rows={10}
@@ -255,41 +528,33 @@ function UpdateProfile() {
                                 <div className="enter-ele">Select Your Comfort Coding Time</div>
                                 <div className="dropdown custom-dropdown-menu1">
                                     <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        {profile.timeToCode===""?<span>Select Your Comfort Coding Time</span>:<span>Your Prefered Time Is {profile.timeToCode}</span>}
+                                        {profile.timeToCode === "" ? <span className="dropdown-text">Select Your Comfort Coding Time</span> : <span className="dropdown-text">Your Prefered Time Is {profile.timeToCode}</span>}
                                     </button>
                                     <div className="dropdown-menu custom-dropdown-menu2" aria-labelledby="dropdownMenuButton">
-                                        <div className="dropdown-item" onClick={(e)=>{handleTimeToCode(e,"morning")}}>Early Bird Morning</div>
-                                        <div className="dropdown-item" onClick={(e)=>{handleTimeToCode(e,"noon")}}>Noontime Nocturne</div>
-                                        <div className="dropdown-item" onClick={(e)=>{handleTimeToCode(e,"evening")}}>Evening Awakening</div>
-                                        <div className="dropdown-item" onClick={(e)=>{handleTimeToCode(e,"night")}}>Night Owl</div>
+                                        <div className="dropdown-item" onClick={(e) => { handleTimeToCode(e, "morning") }}>Early Bird Morning</div>
+                                        <div className="dropdown-item" onClick={(e) => { handleTimeToCode(e, "noon") }}>Noontime Nocturne</div>
+                                        <div className="dropdown-item" onClick={(e) => { handleTimeToCode(e, "evening") }}>Evening Awakening</div>
+                                        <div className="dropdown-item" onClick={(e) => { handleTimeToCode(e, "night") }}>Night Owl</div>
                                     </div>
                                 </div>
                                 <div className="enter-ele">Select Your Prefrence</div>
                                 <div className="dropdown custom-dropdown-menu1">
                                     <button className="btn btn-secondary dropdown-toggle ddmp" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        {profile.prefer===""?<span>Select Your Prefrence</span>:<span>Your Prefrence Is {profile.prefer}</span>}
+                                        {profile.prefer === "" ? <span className="dropdown-text">Select Your Prefrence</span> : <span className="dropdown-text">Your Prefrence Is {profile.prefer}</span>}
                                     </button>
                                     <div className="dropdown-menu custom-dropdown-menu2" aria-labelledby="dropdownMenuButton">
-                                        <div className="dropdown-item" onClick={(e)=>{handlePrefer(e,"development")}}>Development</div>
-                                        <div className="dropdown-item" onClick={(e)=>{handlePrefer(e,"dsa")}}>Data Structures And Algorithms</div>
+                                        <div className="dropdown-item" onClick={(e) => { handlePrefer(e, "development") }}>Development</div>
+                                        <div className="dropdown-item" onClick={(e) => { handlePrefer(e, "dsa") }}>Data Structures And Algorithms</div>
                                     </div>
                                 </div>
 
-                                {/* <input type="submit" value="Submit" className="btn btn-outline-dark submit" style={{color:"white"}}/> */}
+                                <input type="submit" value="Update Profile" className="btn btn-outline-primary submit" style={{color:"white"}}/>
                             </div>
                         </div>
-                        {/* <label htmlFor="">timeToCode</label>
-                    <input type="text" name="" id="" value={profile.timeToCode} onChange={(e)=>{
-                        setProfile({
-                            ...profile,
-                            timeToCode : e.target.value
-                        });
-                        console.log(profile)
-                    }}/> */}
                     </form>
                 </>) : null}
         </div>
     )
 }
 
-export default UpdateProfile
+export default UpdateProfile;

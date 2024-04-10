@@ -86,6 +86,10 @@ var userSchema = new mongoose.Schema({
     prefer : {
         type : String,
         default : ""
+    },
+    friendScore : {
+        type : [mongoose.Schema.Types.Mixed],
+        default: []
     }
 });
 
