@@ -34,20 +34,32 @@ var userSchema = new mongoose.Schema({
     region : {
         country : { 
             type:String, 
-            default:"America" 
+            default:"India" 
         },
         state : { 
             type:String, 
-            default:"New Mexico" 
+            default:"Gujarat" 
         },
         city : { 
             type:String, 
-            default:"Negra Arroyo Lane  , Albuquerque" 
+            default:"Ahmedabad" 
+        },
+        iso2Country : {
+            type : String,
+            default : "IN"
+        },
+        iso2State : {
+            type : String,
+            default : "GJ"
         }
     },
     skills : {
         top3 : {
             type : [String],
+            default : []
+        },
+        top3short : {
+            type:[String],
             default : []
         },
         normal : {

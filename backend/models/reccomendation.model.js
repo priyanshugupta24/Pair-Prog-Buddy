@@ -10,10 +10,6 @@ var reccomendationSchema = new mongoose.Schema({
             type : [mongoose.Schema.Types.Mixed],
             default: []
         },
-        both : {
-            type : [mongoose.Schema.Types.Mixed],
-            default : []
-        }
     },
     skillBased : {
         lc : {
@@ -24,10 +20,6 @@ var reccomendationSchema = new mongoose.Schema({
             type : [mongoose.Schema.Types.Mixed],
             default: []
         },
-        both : {
-            type : [mongoose.Schema.Types.Mixed],
-            default : []
-        }
     }
 });
 

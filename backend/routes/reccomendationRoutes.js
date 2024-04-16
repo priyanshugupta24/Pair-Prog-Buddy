@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-// var {  } = require("../controller/reccomendationController.js");
+var { fetchReccomendation } = require("../controller/reccomendationController.js");
 
-// router.route("/").post();
+router.route("/fetchReccomendation").post(fetchReccomendation);
 
 module.exports = router;

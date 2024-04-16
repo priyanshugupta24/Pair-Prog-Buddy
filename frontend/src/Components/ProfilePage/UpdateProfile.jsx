@@ -23,6 +23,10 @@ function UpdateProfile() {
         iso2Country : "",
         iso2State : ""
     }) 
+    const [prevSkills,setPrevSkills] = useState({
+        top3short : []
+    });
+    const [prevPrefer,setPrevPrefer] = useState();
     const [ownUsername, setOwnUsername] = useState("");
     const [countries, setCountries] = useState([{
         name: "",
@@ -57,13 +61,17 @@ function UpdateProfile() {
         timeToCode: "",
         skills: {
             top3: ["", " "],
-            normal: []
+            normal: [],
+            top3short : []
         },
         username: profileId,
         prefer: "",
         email : "",
     });
 
+    useEffect(()=>{
+        console.log("This is Previous Prefer : ",prevPrefer)
+    },[prevPrefer])
     useEffect(() => {
         getProfile();
         getOwnUsername();
@@ -105,7 +113,8 @@ function UpdateProfile() {
                 pfp: response.data.user.pfp,
                 skills: {
                     top3: response.data.user.skills.top3,
-                    normal: response.data.user.skills.normal
+                    normal: response.data.user.skills.normal,
+                    top3short : response.data.user.skills.top3short,
                 },
                 timeToCode: response.data.user.timeToCode,
                 friends: response.data.user.friends,
@@ -125,6 +134,12 @@ function UpdateProfile() {
             });
             //   console.log(user)
             setProfile(user);
+            setPrevSkills({top3short : response.data.user.skills.top3short});
+            setPrevPrefer(response.data.user.prefer);
+            // console.log("This is ",response.data.user.prefer)
+            // console.log("This is ",prevPrefer)
+            // console.log("This is 2 ",response.data.user.skills.top3short);
+            // console.log("This is 2 ",prevSkills);
         } catch (err) {
             console.log("Not Authenticated");
         }
@@ -147,7 +162,9 @@ function UpdateProfile() {
             
             const response = await axios.post("http://localhost:5123/api/saveProfile", {
                 profile:profile,
-                prev : prevCsc
+                prev : prevCsc,
+                prevSkills : prevSkills,
+                prevPrefer : prevPrefer,
             }, {
               headers: {
                 "Content-type": "application/json"
@@ -328,13 +345,14 @@ function UpdateProfile() {
         })
         // console.log(profile.region.state)
     }
-    const handleTop3Add = (name) => {
+    const handleTop3Add = (name,short) => {
         if(profile.skills.top3.length < 3){
             setProfile(prevProfile => ({
                 ...prevProfile,
                 skills: {
                     ...prevProfile.skills,
-                    top3: [...prevProfile.skills.top3, name]
+                    top3: [...prevProfile.skills.top3, name],
+                    top3short : [...prevProfile.skills.top3short, short]
                 }
             }));
         }
@@ -345,8 +363,7 @@ function UpdateProfile() {
             ...prevProfile,
             skills: {
                 ...prevProfile.skills,
-                normal: [...prevProfile.skills.normal, name]
-            }
+                normal: [...prevProfile.skills.normal, name],            }
         }));
     }
     const handleSkillsRemove = (name) =>{
@@ -360,14 +377,32 @@ function UpdateProfile() {
         }));
         // console.log(name)
     }
+    // useEffect(()=>{
+    //     console.log(profile)
+    // },[profile]);
+    function getShortFromName(name) {
+        const foundSkill = skills.find(skill => skill.name === name);
+        if (foundSkill) {
+            return foundSkill.short;
+        } else {
+            return null; // or any default value you prefer if the skill name is not found
+        }
+    }
     const handleTop3Remove = (name) => {
-        setProfile(prevProfile => ({
-            ...prevProfile,
-            skills: {
-                ...prevProfile.skills,
-                top3: prevProfile.skills.top3.filter(element => element !== name)
-            }
-        }));
+        setProfile(prevProfile => {
+            const shortSkills = getShortFromName(name);
+            console.log(shortSkills);
+            const updatedTop3 = prevProfile.skills.top3.filter(skill => skill !== name);
+            const updatedTop3Short = prevProfile.skills.top3short.filter(skill => skill !== shortSkills);
+            return {
+                ...prevProfile,
+                skills: {
+                    ...prevProfile.skills,
+                    top3: updatedTop3,
+                    top3short: updatedTop3Short
+                }
+            };
+        });
     }
     return (
         <div style={{ color: "white" }}>
@@ -485,7 +520,7 @@ function UpdateProfile() {
                                     <div className="dropdown-menu custom-dropdown-menu2" id="dropdown1" aria-labelledby="dropdownMenuButton">
                                         {
                                             Array.isArray(skills) && skills.map((elements, index) => (
-                                                <div key={index} className="dropdown-item" onClick={()=>{handleTop3Add(elements.name)}}>{elements.name}</div>
+                                                <div key={index} className="dropdown-item" onClick={()=>{handleTop3Add(elements.name,elements.short)}}>{elements.name}</div>
                                             ))
                                         }
                                     </div>
