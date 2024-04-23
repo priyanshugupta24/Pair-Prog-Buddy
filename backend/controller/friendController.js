@@ -16,6 +16,10 @@ const sendFriendReq = async (req, res) => {
             { _id: toSendReqId, "waitList": { $ne: getId } },
             { "$push": { "waitList": getId } },
         )
+        await user.updateOne(
+            { _id: getId, "sendTo": { $ne: toSendReqId } },
+            { "$push": { "sendTo": toSendReqId } },
+        )
         res.status(200).json(`Friend Request Sent to ${toSendReqId}`);
     }
 }
@@ -83,11 +87,12 @@ const acceptFriendReq = async (req, res) => {
             score += countSkills;
 
             await user.updateOne(
-                {
-                    _id : getId, 
-                    "waitList": { $eq : sentReqId }
-                },
+                {_id : getId, "waitList": { $eq : sentReqId }},
                 { "$pull": { "waitList":  sentReqId}},
+            )
+            await user.updateOne(
+                {_id : sentReqId, "sendTo": { $eq : getId }},
+                { "$pull": { "sendTo":  getId}},
             )
             const friendDetail = {
                 _id : sentReqId,
@@ -119,6 +124,10 @@ const acceptFriendReq = async (req, res) => {
             await user.updateOne(
                 { _id: getId },
                 { "$pull": { "waitList": sentReqId } },
+            )
+            await user.updateOne(
+                { _id: sentReqId },
+                { "$pull": { "sendTo": getId } },
             )
             res.status(200).json(`Friend Request Rejected by ${getId}`);
         }
@@ -164,4 +173,14 @@ const getFriends = async (req, res) => {
     }
 }
 
-module.exports = { sendFriendReq, acceptFriendReq, removeFriend, getFriends };
+const getProfileRemote = async (req,res) =>{
+    const username = req.body.username;
+    const existingUserRemote = await user.findOne({ username : username });
+    return res.status(200).json({ user:existingUserRemote })
+}
+
+module.exports = { sendFriendReq, acceptFriendReq, removeFriend, getFriends,getProfileRemote };
+// {
+    // "_id" : "661b6af20cf089f9f6048ec9",
+    // "accept" : "accepted"
+// }

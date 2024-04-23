@@ -10,15 +10,16 @@ function permutations(input, output = [], current = "", index = 0) {
     permutations(input, output, current, index + 1);
 }
 
-const dfs = async (node, vis, ans, cnt, thresh, return2,friendsFetchCap) => {
+const dfs = async (node, vis, ans, cnt, thresh, return2, friendsFetchCap,friendList) => {
     vis[node] = true;
-    if(ans.length>=friendsFetchCap)return;
+    if (ans.length >= friendsFetchCap) return;
     const selfUser = await user.findOne({ _id: node });
     const objectToFind = { "_id": node, "username": selfUser.username };
     const exists = ans.some(item =>
         item._id === objectToFind._id && item.username === objectToFind.username
     );
-    if (!exists && cnt !== 0 && cnt !== 1) {
+    const exists2 = friendList.some(item=>item._id === objectToFind._id && item.username === objectToFind.username);
+    if (!exists && cnt !== 0 && cnt !== 1 && !exists2) {
         ans.push({ "_id": node, "username": selfUser.username });
     }
 
@@ -30,7 +31,7 @@ const dfs = async (node, vis, ans, cnt, thresh, return2,friendsFetchCap) => {
         // console.log(selfUser.username, userSelf["friends"][i]["username"], userSelf["friends"][i]["score"], cnt, !vis[userSelf["friends"][i]["_id"]])
         if (!vis[userSelf["friends"][i]["_id"]] && userSelf["friends"][i]["score"] >= (thresh + cnt)) {
             // console.log("Come")
-            await dfs(userSelf["friends"][i]["_id"], vis, ans, cnt + 1, thresh, return2,friendsFetchCap);
+            await dfs(userSelf["friends"][i]["_id"], vis, ans, cnt + 1, thresh, return2, friendsFetchCap,friendList);
         }
         else if (!vis[userSelf["friends"][i]["_id"]] && userSelf["friends"][i]["score"] < (thresh + cnt)) {
             const objectToFind = { "_id": node, "username": selfUser.username, "cnt": cnt }
@@ -45,6 +46,7 @@ const dfs = async (node, vis, ans, cnt, thresh, return2,friendsFetchCap) => {
 
 var fetchReccomendation = async (req, res) => {
     const profile = req.body.profile;
+    // console.log(profile)
 
     let countRegion = 0;
     let countRegionCap = 2;//5(real) => 4(reel,input)
@@ -74,34 +76,34 @@ var fetchReccomendation = async (req, res) => {
     permutations(top3skills, permutedSkills);
 
     // Write Friend Logic
-    try{
-    var existingRecommendation = await reccomendation.findOne({});
-    var userSelfFriendList = await user.findOne({ _id: profile._id });
-    userSelfFriendList.friends.sort((a, b) => b.score - a.score);
+    try {
+        var existingRecommendation = await reccomendation.findOne({});
+        var userSelfFriendList = await user.findOne({ _id: profile._id });
+        userSelfFriendList.friends.sort((a, b) => b.score - a.score);
 
-    let return2 = []
-    let vis = {};
-    let thresh = userSelfFriendList.friends[0]["score"] - (userSelfFriendList.friends[0]["score"]*0.4);
-    await dfs(profile._id, vis, reccom, 0, thresh, return2,friendsFetchCap);
-    // console.log("This is the ans : ", reccom, return2);
+        let return2 = []
+        let vis = {};
+        let thresh = userSelfFriendList.friends[0]["score"] - (userSelfFriendList.friends[0]["score"] * 0.4);
+        await dfs(profile._id, vis, reccom, 0, thresh, return2, friendsFetchCap,userSelfFriendList.friends);
+        // console.log("This is the ans : ", reccom, return2);
 
-    let return1;
-    let cntForWhile = 5;
-    while (cntForWhile > 0) {
-        return1 = return2;
-        return2 = [];
-        if(return1.length === 0 && reccom.length >= friendsFetchCap)break;
-        for (var i = 0; i < return1.length; i++) {
-            const cnt2 = return1[i]["cnt"];
-            await dfs(return1[i]["_id"], vis, reccom, cnt2, thresh, return2,friendsFetchCap);
+        let return1;
+        let cntForWhile = 5;
+        while (cntForWhile > 0) {
+            return1 = return2;
+            return2 = [];
+            if (return1.length === 0 && reccom.length >= friendsFetchCap) break;
+            for (var i = 0; i < return1.length; i++) {
+                const cnt2 = return1[i]["cnt"];
+                await dfs(return1[i]["_id"], vis, reccom, cnt2, thresh, return2, friendsFetchCap,userSelfFriendList.friends);
+            }
+            thresh -= 4;
+            cntForWhile--;
+            // console.log("This is 3 : ", return1, return2);
         }
-        thresh -= 4;
-        cntForWhile--;
-        // console.log("This is 3 : ", return1, return2);
+        // console.log(reccom);
     }
-    // console.log(reccom);
-    }
-    catch(err){
+    catch (err) {
         console.log(err);
     }
     countRegionCap += (friendsFetchCap - reccom.length);
@@ -127,7 +129,9 @@ var fetchReccomendation = async (req, res) => {
             while (count3Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
                     && item.username === lcList[thirdMix][mix3Region][count3Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
+                    && item.username === lcList[thirdMix][mix3Region][count3Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[thirdMix][mix3Region][count3Region]);
                     countRegion++;
                     if (countRegion > countRegionCap) break;
@@ -140,7 +144,9 @@ var fetchReccomendation = async (req, res) => {
             while (count2Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
                     && item.username === lcList[secondMix][mix2Region][count2Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
+                    && item.username === lcList[secondMix][mix2Region][count2Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[secondMix][mix2Region][count2Region]);
                     countRegion++;
                     if (countRegion > countRegionCap) break;
@@ -153,7 +159,9 @@ var fetchReccomendation = async (req, res) => {
             while (count1Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
                     && item.username === lcList[firstMix][mix1Region][count1Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
+                    && item.username === lcList[firstMix][mix1Region][count1Region].username);
+                if (!exists && exists2) {
                     reccom.push(lcList[firstMix][mix1Region][count1Region]);
                     countRegion++;
                     if (countRegion > countRegionCap) break;
@@ -172,7 +180,9 @@ var fetchReccomendation = async (req, res) => {
                     while (countSkill >= 0) {
                         let exists = reccom.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
                             && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
-                        if (!exists) {
+                        let exists2 = userSelfFriendList.friends.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
+                            && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
+                        if (!exists && !exists2) {
                             reccom.push(lcListSkills[i][permutedSkills[j]][countSkill]);
                             countSkills++;
                             if (countSkills > countSkillsCap) break;
@@ -204,7 +214,9 @@ var fetchReccomendation = async (req, res) => {
             while (count3Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
                     && item.username === lcList[thirdMix][mix3Region][count3Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
+                    && item.username === lcList[thirdMix][mix3Region][count3Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[thirdMix][mix3Region][count3Region]);
                     countRegionDev++;
                     if (countRegionDev >= countRegionCapDev) break;
@@ -217,7 +229,9 @@ var fetchReccomendation = async (req, res) => {
             while (count2Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
                     && item.username === lcList[secondMix][mix2Region][count2Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
+                    && item.username === lcList[secondMix][mix2Region][count2Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[secondMix][mix2Region][count2Region]);
                     countRegionDev++;
                     if (countRegionDev >= countRegionCapDev) break;
@@ -230,7 +244,9 @@ var fetchReccomendation = async (req, res) => {
             while (count1Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
                     && item.username === lcList[firstMix][mix1Region][count1Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
+                    && item.username === lcList[firstMix][mix1Region][count1Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[firstMix][mix1Region][count1Region]);
                     countRegionDev++;
                     if (countRegionDev >= countRegionCapDev) break;
@@ -250,7 +266,9 @@ var fetchReccomendation = async (req, res) => {
                     while (countSkill >= 0) {
                         let exists = reccom.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
                             && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
-                        if (!exists) {
+                        let exists2 = userSelfFriendList.friends.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
+                            && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
+                        if (!exists && !exists2) {
                             reccom.push(lcListSkills[i][permutedSkills[j]][countSkill]);
                             countSkillsDev++;
                             if (countSkillsDev >= countSkillsCapDev) break;
@@ -262,22 +280,25 @@ var fetchReccomendation = async (req, res) => {
         }
 
         randomUser += countSkillsCapDev - countSkillsDev;
-        try{
-        const userList = await user.find({});
-        const len = userList.length;
-        const mini = 0, maxi = len;
-        while (randomUserCap != randomUser) {
-            const rand = Math.floor(Math.random() * (maxi - mini + 1)) + mini;
-            let obj = { _id: userList[rand]["_id"].toHexString(), username: userList[rand].username };
-            let exists = reccom.find(item => item._id === obj._id && item.username === obj.username);
-            if (!exists) {
-                reccom.push(obj);
-                randomUser++;
-                if (randomUser == randomUserCap) break;
+        try {
+            const userList = await user.find({});
+            const len = userList.length;
+            const mini = 0, maxi = len;
+            let maxReps = 10, reps = 0;
+            while (randomUserCap != randomUser && maxReps != reps) {
+                const rand = Math.floor(Math.random() * (maxi - mini + 1)) + mini;
+                let obj = { _id: userList[rand]["_id"].toHexString(), username: userList[rand].username };
+                let exists = reccom.find(item => item._id === obj._id && item.username === obj.username);
+                let exists2 = userSelfFriendList.friends.find(item => item._id === obj._id && item.username === obj.username);
+                if (!exists && !exists2) {
+                    reccom.push(obj);
+                    randomUser++;
+                    if (randomUser == randomUserCap) break;
+                }
+                reps++;
             }
         }
-        }
-        catch(err){
+        catch (err) {
             console.log(err);
         }
     }
@@ -302,7 +323,9 @@ var fetchReccomendation = async (req, res) => {
             while (count3Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
                     && item.username === lcList[thirdMix][mix3Region][count3Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
+                    && item.username === lcList[thirdMix][mix3Region][count3Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[thirdMix][mix3Region][count3Region]);
                     countRegion++;
                     if (countRegion > countRegionCap) break;
@@ -315,7 +338,9 @@ var fetchReccomendation = async (req, res) => {
             while (count2Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
                     && item.username === lcList[secondMix][mix2Region][count2Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
+                    && item.username === lcList[secondMix][mix2Region][count2Region].username);
+                if (!exists && exists2) {
                     reccom.push(lcList[secondMix][mix2Region][count2Region]);
                     countRegion++;
                     if (countRegion > countRegionCap) break;
@@ -328,7 +353,9 @@ var fetchReccomendation = async (req, res) => {
             while (count1Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
                     && item.username === lcList[firstMix][mix1Region][count1Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
+                    && item.username === lcList[firstMix][mix1Region][count1Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[firstMix][mix1Region][count1Region]);
                     countRegion++;
                     if (countRegion > countRegionCap) break;
@@ -347,7 +374,9 @@ var fetchReccomendation = async (req, res) => {
                     while (countSkill >= 0) {
                         let exists = reccom.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
                             && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
-                        if (!exists) {
+                        let exists2 = userSelfFriendList.friends.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
+                            && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
+                        if (!exists && !exists2) {
                             reccom.push(lcListSkills[i][permutedSkills[j]][countSkill]);
                             countSkills++;
                             if (countSkills > countSkillsCap) break;
@@ -379,7 +408,9 @@ var fetchReccomendation = async (req, res) => {
             while (count3Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
                     && item.username === lcList[thirdMix][mix3Region][count3Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[thirdMix][mix3Region][count3Region]._id
+                    && item.username === lcList[thirdMix][mix3Region][count3Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[thirdMix][mix3Region][count3Region]);
                     countRegionDev++;
                     if (countRegionDev >= countRegionCapDev) break;
@@ -392,7 +423,9 @@ var fetchReccomendation = async (req, res) => {
             while (count2Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
                     && item.username === lcList[secondMix][mix2Region][count2Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[secondMix][mix2Region][count2Region]._id
+                    && item.username === lcList[secondMix][mix2Region][count2Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[secondMix][mix2Region][count2Region]);
                     countRegionDev++;
                     if (countRegionDev >= countRegionCapDev) break;
@@ -405,7 +438,9 @@ var fetchReccomendation = async (req, res) => {
             while (count1Region > 0) {
                 let exists = reccom.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
                     && item.username === lcList[firstMix][mix1Region][count1Region].username);
-                if (!exists) {
+                let exists2 = userSelfFriendList.friends.find(item => item._id === lcList[firstMix][mix1Region][count1Region]._id
+                    && item.username === lcList[firstMix][mix1Region][count1Region].username);
+                if (!exists && !exists2) {
                     reccom.push(lcList[firstMix][mix1Region][count1Region]);
                     countRegionDev++;
                     if (countRegionDev >= countRegionCapDev) break;
@@ -425,7 +460,9 @@ var fetchReccomendation = async (req, res) => {
                     while (countSkill >= 0) {
                         let exists = reccom.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
                             && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
-                        if (!exists) {
+                        let exists2 = userSelfFriendList.friends.find(item => item._id === lcListSkills[i][permutedSkills[j]][countSkill]._id
+                            && item.username === lcListSkills[i][permutedSkills[j]][countSkill].username);
+                        if (!exists && !exists2) {
                             reccom.push(lcListSkills[i][permutedSkills[j]][countSkill]);
                             countSkillsDev++;
                             if (countSkillsDev >= countSkillsCapDev) break;
@@ -442,7 +479,8 @@ var fetchReccomendation = async (req, res) => {
         // console.log(userList)
         const len = userList.length;
         const mini = 0, maxi = len;
-        while (randomUserCap != randomUser && reccom.length > 20) {
+        let maxReps = 10, reps = 0;
+        while (randomUserCap != randomUser && reccom.length > 20 && reps != maxReps) {
             const rand = Math.floor(Math.random() * (maxi - mini + 1)) + mini;
             // console.log(rand);
             let obj = { _id: userList[rand]["_id"].toHexString(), username: userList[rand].username };
@@ -452,6 +490,7 @@ var fetchReccomendation = async (req, res) => {
                 randomUser++;
                 if (randomUser == randomUserCap) break;
             }
+            reps++;
         }
     }
     res.status(200).json({ "msg": "Success", "reccom": reccom });

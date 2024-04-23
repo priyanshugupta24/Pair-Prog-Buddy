@@ -1,0 +1,92 @@
+.outer{
+    display: flex;
+}
+.left{
+    width : 25vw;
+    background-color: #000000;
+    border : 2px solid white;
+    color : white;
+    height : fit-content;
+}
+.right{
+    width : 75vw;
+    /* height : 92vh; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.reccom-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left:3vh;
+    margin-top:3vh;
+    align-items: center;
+    justify-content: center;
+}
+.outer-friend-div{
+    height:fit-content;
+    width : 20vw;
+    padding : 5vh;
+    color:white;
+    background-color: #343a40;
+    margin : 0.5vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+.pfp-image{
+    border-radius: 5px;
+    width : 14vw;
+    height : 30vh;
+}
+.element-name{
+    font-size: 2vw;
+}
+.element-uname,.element-region,.element-skills,.element-ttc,.element-prefer{
+    font-size: 1.1vw;
+    text-align: center;
+    padding : 0.2vw;
+}
+.element-request{
+    width : 17vw;
+    margin-top: 2vw;
+}
+.find-friends{
+    border-bottom : 2px solid white;
+    padding : 1vw;
+    text-align: center;
+    background-color: white;
+    color : black;
+}
+.accept-friends{
+    border-bottom : 2px solid white;
+    padding : 1vw;
+    text-align: center;
+    background-color: black;
+    color : white;
+}
+.settings{
+    border-bottom : 2px solid white;
+    padding : 1vw;
+    text-align: center;
+    background-color: black;
+    color : white;
+}
+.chatbot{
+    border-bottom : 2px solid white;
+    padding : 1vw;
+    text-align: center;
+    background-color: black;
+    color : white;
+}
+.friends{
+    border-bottom : 2px solid white;
+    padding : 1vw;
+    text-align: center;
+    background-color: black;
+    color : white;
+}

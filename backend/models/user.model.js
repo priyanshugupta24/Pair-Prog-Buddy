@@ -83,6 +83,10 @@ var userSchema = new mongoose.Schema({
         type : [String],
         default : []
     },
+    sendTo : {
+        type : [String],
+        default : []
+    },
     shortIntro : {
         type : String,
         default : ""

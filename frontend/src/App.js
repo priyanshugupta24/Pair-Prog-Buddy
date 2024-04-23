@@ -4,6 +4,7 @@ import Session from './Components/Session/Session'
 import HomePage from './Components/HomePage/HomePage';
 import ProfilePage from './Components/ProfilePage/ProfilePage';
 import UpdateProfile from './Components/ProfilePage/UpdateProfile';
+import FriendsPage from './Components/FriendsPage/FriendsPage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path='/session/:sessionId' element={<Session/>} />
             <Route path='/profile/:profileId' element={<ProfilePage/>} />
             <Route path='/updateprofile/:profileId' element={<UpdateProfile/>} />
+            <Route path='/friends' element={<FriendsPage/>} />
           </Routes>
         </BrowserRouter>
     </div>
