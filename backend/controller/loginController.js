@@ -553,4 +553,15 @@ const saveProfile = async (req, res) => {
 
     res.status(200).json("Profile Updated Successfully!!");
 }
-module.exports = { postLogin, postRegister, getProfile, postLogout, profileRemote, getUserDetails, saveProfile };
+const getUsersList = async(req,res) => {
+    try{
+        const userList = await user.find({},{_id:1,username:1});
+        // console.log(userList);
+        res.status(200).json({userList : userList});
+    }
+    catch(err){
+        res.status(400).json({err:err})
+    }
+}
+
+module.exports = { postLogin, postRegister, getProfile, postLogout, profileRemote, getUserDetails, saveProfile,getUsersList };

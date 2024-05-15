@@ -106,6 +106,10 @@ var userSchema = new mongoose.Schema({
     friendScore : {
         type : [mongoose.Schema.Types.Mixed],
         default: []
+    },
+    gc : {
+        type:[String],
+        default : []
     }
 });
 

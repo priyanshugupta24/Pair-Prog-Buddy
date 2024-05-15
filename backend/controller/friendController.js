@@ -175,12 +175,21 @@ const getFriends = async (req, res) => {
 
 const getProfileRemote = async (req,res) =>{
     const username = req.body.username;
-    const existingUserRemote = await user.findOne({ username : username });
-    return res.status(200).json({ user:existingUserRemote })
+    const _id = req.body._id;
+    const existingUserRemoteUname = await user.findOne({ username : username });
+    if(existingUserRemoteUname)return res.status(200).json({ user:existingUserRemoteUname })
+    const existingUserRemoteid = await user.findOne({ _id : _id });
+    if(existingUserRemoteid)return res.status(200).json({ user:existingUserRemoteid })
 }
+const getWaitList = async(req,res) => {
+    if (req.cookies["user-info"]) {
+        const getId = req.cookies["user-info"]._id;
 
-module.exports = { sendFriendReq, acceptFriendReq, removeFriend, getFriends,getProfileRemote };
-// {
-    // "_id" : "661b6af20cf089f9f6048ec9",
-    // "accept" : "accepted"
-// }
+        const existingUserSelf = await user.findOne({ _id: getId });
+        if (!existingUserSelf) res.status(400).json({ err: "You are not Authenticated" });
+        // console.log(existingUserSelf)
+        res.status(200).json({ waitList : existingUserSelf.waitList });
+    }
+}
+const revokeFriendReq = async(req,res) => {}
+module.exports = { sendFriendReq, acceptFriendReq, removeFriend, getFriends,getProfileRemote,getWaitList,revokeFriendReq };

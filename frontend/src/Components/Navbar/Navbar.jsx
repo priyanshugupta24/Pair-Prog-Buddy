@@ -222,10 +222,10 @@ function Navbar() {
               <NavLink exact="true" className="nav-link" active="active" to="/">Home</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" active="active" to="/link" exact="true">Link</NavLink>
+              <NavLink className="nav-link" active="active" to="/friends" exact="true">Friends</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" active="active" to="/disabled" exact="true">Disabled</NavLink>
+              <NavLink className="nav-link" active="active" to="/session/1234" exact="true">Session Page</NavLink>
             </li>
           </ul>
           <form className="form-inline my-2 my-lg-0">

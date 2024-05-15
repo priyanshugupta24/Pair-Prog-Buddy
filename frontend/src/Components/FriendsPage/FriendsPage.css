@@ -10,7 +10,7 @@
 }
 .right{
     width : 75vw;
-    /* height : 92vh; */
+    height : fit-content;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,6 +45,8 @@
 }
 .element-name{
     font-size: 2vw;
+    cursor: pointer;
+    color:white;
 }
 .element-uname,.element-region,.element-skills,.element-ttc,.element-prefer{
     font-size: 1.1vw;
@@ -89,4 +91,24 @@
     text-align: center;
     background-color: black;
     color : white;
+}
+.search-bar{
+    display : flex;
+    flex-direction: row;
+    margin-top: 3vw;
+}
+#inputSearch {
+    /* margin-left: 3vw; */
+    margin-top: 2vw;
+    height: 5vh;
+}
+.friends,.find-friends,.accept-friends,.chatbot,.settings{
+    cursor : pointer;
+}
+.accept-friends-page{
+    margin-top: 1vw;
+}
+.element-request-accept,.element-request-reject{
+    width : 17vw;
+    /* margin-top: 2vw; */
 }

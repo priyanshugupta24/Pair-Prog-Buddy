@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-var { postLogin,postRegister,getProfile,postLogout,profileRemote,getUserDetails,saveProfile } = require("../controller/loginController.js");
+var { postLogin,postRegister,getProfile,postLogout,profileRemote,getUserDetails,saveProfile,getUsersList,test } = require("../controller/loginController.js");
 const { validateToken } = require("../middlewares/JWTmiddleware.js");
 
 router.route("/login").post(postLogin);
@@ -11,5 +11,6 @@ router.route("/saveProfile").post(saveProfile);
 router.route("/profile").get(validateToken,getProfile);
 router.route("/profileRemote").post(profileRemote);
 router.route("/getUserDetails").get(getUserDetails);
+router.route("/getUsersList").get(getUsersList);
 
 module.exports = router;
